@@ -60,18 +60,18 @@ graph TD
 
     Target(("🎯 Servidor Objetivo")):::external
 
-    UserBrowser -->|POST /api/scan| GUI_Server
+    UserBrowser -->|"POST /api/scan"| GUI_Server
     CLIUser --> ShieldCLI
     
     GUI_Server --> Engine
     FastAPI_Server --> Engine
     ShieldCLI --> Engine
 
-    Engine -->|Auditoría Básica| PySSL
-    Engine -->|Deep Scan (Opcional)| TestSSL
+    Engine -->|"Auditoría Básica"| PySSL
+    Engine -->|"Deep Scan (Opcional)"| TestSSL
 
-    PySSL -->|TCP 443| Target
-    TestSSL -->|Probes TCP| Target
+    PySSL -->|"TCP 443"| Target
+    TestSSL -->|"Probes TCP"| Target
 ```
 
 ---
@@ -177,3 +177,4 @@ curl -s http://146.190.142.141:8081/scan/ejemplo.com?deep=true
 ```
 
 ---
+*Desarrollado para la excelencia cibernética de Risaralda Challenge.*
