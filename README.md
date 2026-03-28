@@ -1,12 +1,12 @@
 # 🛡️ Operación Defensa Web: Análisis de Configuración TLS
 
-**Análisis de Seguridad de Transporte (TLS) en tiempo real con Interfaz Gráfica Premium.**
+**Análisis de Seguridad de Transporte (TLS) en tiempo real **
 
 Esta herramienta ha sido desarrollada como parte del reto "Operación Defensa Web: Análisis de Configuración TLS" de Risaralda. Proporciona una plataforma robusta para que analistas de seguridad y administradores de sistemas auditen de forma rápida y visual la configuración criptográfica de servidores públicos o privados.
 
 ---
 
-## 🗺️ Visualización de Procesos y Flujos (Fricción Cero)
+## 🗺️ Visualización de Procesos y Flujos 
 
 El siguiente diagrama representa el ciclo de vida completo de un análisis, diseñado para ser intuitivo desde el primer vistazo.
 
