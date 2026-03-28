@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operación Defensa Web: Análisis TLS</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            900: '#064e3b',
+                            950: '#022c22',
+                        },
+                        surface: {
+                            800: '#1f2937',
+                            900: '#111827',
+                            950: '#030712'
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-surface-950 text-gray-200 font-sans min-h-screen selection:bg-brand-500 selection:text-white flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-surface-900 border-b border-gray-800 sticky top-0 z-50 glass-effect">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <div class="bg-brand-500/20 p-2 rounded-lg border border-brand-500/30 text-brand-500">
+                        <i data-lucide="shield-check" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+                            Operación Defensa Web
+                        </h1>
+                        <p class="text-xs text-brand-500 font-medium tracking-wide uppercase">Análisis TLS Engine</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="https://github.com/tu-repo" target="_blank" class="text-gray-400 hover:text-white transition-colors" title="Código Fuente">
+                        <i data-lucide="github" class="w-5 h-5"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        
+        <!-- Welcome Section & Input Form -->
+        <section id="input-section" class="space-y-6 fade-in">
+            <div class="max-w-3xl">
+                <h2 class="text-3xl font-bold text-white mb-2">Auditoría de Seguridad Transport Layer</h2>
+                <p class="text-gray-400">Ingrese dominios o direcciones IPv4 separados por salto de línea para ejecutar un análisis en profundidad de la configuración TLS, protocolos soportados y vulnerabilidades criptográficas.</p>
+            </div>
+
+            <div class="bg-surface-900 rounded-xl border border-gray-800 shadow-2xl overflow-hidden glass-card">
+                <div class="p-6">
+                    <label for="targets" class="block text-sm font-medium text-gray-300 mb-2">Objetivos a Analizar</label>
+                    <div class="relative">
+                        <textarea id="targets" rows="5" 
+                            class="block w-full bg-surface-950 border border-gray-700 rounded-lg text-gray-100 p-4 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 resize-none font-mono text-sm placeholder-gray-600 transition-all shadow-inner"
+                            placeholder="ejemplo.com&#10;192.168.1.10&#10;app.empresa.gov.co"></textarea>
+                    </div>
+                    
+                    <!-- Validation Error Message (Hidden by default) -->
+                    <div id="validation-error" class="hidden mt-3 text-red-400 text-sm flex items-center gap-2 bg-red-500/10 p-3 rounded-lg border border-red-500/20">
+                        <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                        <span id="validation-error-text">Por favor ingrese al menos un dominio o IP válido.</span>
+                    </div>
+                </div>
+                <div class="bg-surface-800 px-6 py-4 flex items-center justify-between border-t border-gray-800">
+                    <div class="text-xs text-gray-500 flex items-center gap-2">
+                        <i data-lucide="info" class="w-4 h-4"></i>
+                        Soporta subdominios e IPv4.
+                    </div>
+                    <button id="btn-analyze" class="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-500 text-white px-6 py-2.5 rounded-lg font-medium transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.5)] transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i data-lucide="scan-line" class="w-4 h-4"></i>
+                        Iniciar Análisis
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading Progress Panel (Hidden by default) -->
+        <section id="progress-section" class="hidden space-y-6 slide-up">
+            <div class="bg-surface-900 rounded-xl border border-gray-800 p-8 text-center glass-card relative overflow-hidden">
+                <!-- Decorative background elements -->
+                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-1 bg-gradient-to-r from-transparent via-brand-500 to-transparent opacity-50"></div>
+                
+                <h3 class="text-xl font-semibold text-white mb-8">Escaneando Entorno TLS</h3>
+                
+                <div class="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-12 relative z-10 w-full max-w-2xl mx-auto">
+                    <!-- Phase 1: Ingestion -->
+                    <div class="flex flex-col items-center gap-3 w-32 phase-item" id="phase-1">
+                        <div class="w-12 h-12 rounded-full border-2 border-brand-500 flex items-center justify-center bg-brand-500/10 text-brand-500 phase-icon animate-pulse-slow">
+                            <i data-lucide="database" class="w-5 h-5"></i>
+                        </div>
+                        <span class="text-sm font-medium text-gray-300">Ingesta</span>
+                    </div>
+                    
+                    <!-- Line separator -->
+                    <div class="hidden md:block w-16 h-px bg-gray-700 phase-line"></div>
+                    
+                    <!-- Phase 2: Engine -->
+                    <div class="flex flex-col items-center gap-3 w-32 phase-item opacity-50" id="phase-2">
+                        <div class="w-12 h-12 rounded-full border-2 border-gray-700 flex items-center justify-center bg-surface-800 text-gray-500 phase-icon">
+                            <i data-lucide="terminal-square" class="w-5 h-5"></i>
+                        </div>
+                        <span class="text-sm font-medium text-gray-500">Motor TLS</span>
+                    </div>
+
+                    <!-- Line separator -->
+                    <div class="hidden md:block w-16 h-px bg-gray-700 phase-line"></div>
+                    
+                    <!-- Phase 3: Rules -->
+                    <div class="flex flex-col items-center gap-3 w-32 phase-item opacity-50" id="phase-3">
+                        <div class="w-12 h-12 rounded-full border-2 border-gray-700 flex items-center justify-center bg-surface-800 text-gray-500 phase-icon">
+                            <i data-lucide="cpu" class="w-5 h-5"></i>
+                        </div>
+                        <span class="text-sm font-medium text-gray-500">Motor Reglas</span>
+                    </div>
+                </div>
+
+                <div class="mt-8 text-sm text-gray-400 flex items-center justify-center gap-2">
+                    <i data-lucide="loader-2" class="w-4 h-4 animate-spin text-brand-500"></i>
+                    <span id="loading-message">Verificando sintaxis e inicializando colas...</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard / Results Area (Hidden by default) -->
+        <section id="results-section" class="hidden space-y-8 slide-up">
+            
+            <div class="flex items-center justify-between">
+                <h2 class="text-2xl font-bold text-white">Resultados de Auditoría</h2>
+                <button id="btn-export" class="inline-flex items-center gap-2 bg-surface-800 hover:bg-surface-700 text-white px-4 py-2 rounded-lg font-medium border border-gray-700 transition-colors">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    Exportar Informe PDF
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Summary Card -->
+                <div class="bg-surface-900 rounded-xl border border-gray-800 p-6 glass-card col-span-1 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-400 mb-1">Estado General de Seguridad</h3>
+                        <div class="flex items-center gap-3 mt-4">
+                            <div id="summary-icon-container" class="w-12 h-12 rounded-full flex items-center justify-center">
+                                <!-- Icon injected dynamically -->
+                            </div>
+                            <div>
+                                <h4 id="summary-risk-title" class="text-2xl font-bold text-white">Evaluando...</h4>
+                                <p id="summary-risk-desc" class="text-sm text-gray-400 mt-1">Calculando exposición general.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-6 pt-6 border-t border-gray-800">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-400">Objetivos Analizados:</span>
+                            <span id="summary-targets-count" class="font-mono text-white">0</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm mt-2">
+                            <span class="text-gray-400">Total Hallazgos:</span>
+                            <span id="summary-findings-count" class="font-mono text-white text-red-400 font-bold">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TLS Versions Overview -->
+                <div class="bg-surface-900 rounded-xl border border-gray-800 p-6 glass-card col-span-1 md:col-span-2">
+                    <h3 class="text-sm font-medium text-gray-400 mb-4">Soporte de Versiones TLS Estándar</h3>
+                    <div id="tls-versions-container" class="grid grid-cols-2 sm:grid-cols-4 gap-4 h-full content-start">
+                        <!-- Stat items dynamic injected -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Findings Table -->
+            <div class="bg-surface-900 rounded-xl border border-gray-800 overflow-hidden glass-card flex flex-col">
+                <div class="p-6 border-b border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <h3 class="text-lg font-medium text-white flex items-center gap-2">
+                        <i data-lucide="list-tree" class="w-5 h-5 text-gray-400"></i>
+                        Detalle de Hallazgos y Riesgos
+                    </h3>
+                    
+                    <div class="flex items-center gap-3 w-full sm:w-auto">
+                        <div class="relative w-full sm:w-64">
+                            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                            <input type="text" id="search-input" placeholder="Buscar dominio o IP..." class="w-full bg-surface-950 border border-gray-700 rounded-md py-1.5 pl-9 pr-3 text-sm text-gray-200 focus:ring-1 focus:ring-brand-500 focus:border-brand-500 placeholder-gray-600">
+                        </div>
+                        <select id="filter-criticality" class="bg-surface-950 border border-gray-700 rounded-md py-1.5 pl-3 pr-8 text-sm text-gray-200 focus:ring-1 focus:ring-brand-500 focus:border-brand-500 appearance-none bg-no-repeat bg-[right_0.5rem_center] bg-[length:1em_1em] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIGZpbGw9J25vbmUnIHZpZXdCb3g9JzAgMCAyNCAyNCwgc3Ryb2tlLXdpZHRoPScxLjUnIHN0cm9rZT0nI2EwYWVjMCc+PHBhdGggc3Ryb2tlLWxpbmVjYXA9J3JvdW5kJyBzdHJva2UtbGluZWpvaW49J3JvdW5kJyBkPSdNMCAwaDI0djI0SDB6JyBmaWxsPSdub25lJy8+PHBhdGggZD0nTTYgOWw2IDYgNi02Jy8+PC9zdmc+')]">
+                            <option value="all">Todas</option>
+                            <option value="alta">Alta</option>
+                            <option value="media">Media</option>
+                            <option value="baja">Baja</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-800">
+                        <thead class="bg-surface-950/50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-[25%] cursor-pointer hover:text-white group" onclick="app.sortData('target')">
+                                    <div class="flex items-center gap-1">
+                                        Dominio/IP
+                                        <i data-lucide="arrow-up-down" class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                                    </div>
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-[15%]">Versión TLS</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-[10%]">Estado</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-[15%] cursor-pointer hover:text-white group" onclick="app.sortData('criticality')">
+                                    <div class="flex items-center gap-1">
+                                        Criticidad
+                                        <i data-lucide="arrow-up-down" class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                                    </div>
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-[35%]">Descripción del Riesgo</th>
+                                <th scope="col" class="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider w-[5%]"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body" class="bg-surface-900 divide-y divide-gray-800 text-sm">
+                            <!-- Rows injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="table-empty-state" class="hidden p-12 text-center text-gray-500">
+                    <i data-lucide="search-x" class="w-12 h-12 mx-auto mb-3 opacity-50"></i>
+                    <p>No se encontraron hallazgos que coincidan con la búsqueda.</p>
+                </div>
+            </div>
+
+            <div class="flex justify-center mt-6">
+                <button id="btn-new-analysis" class="text-gray-400 hover:text-white px-4 py-2 flex items-center gap-2 transition-colors">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                    Realizar nuevo análisis
+                </button>
+            </div>
+            
+        </section>
+
+    </main>
+
+    <footer class="border-t border-gray-800 bg-surface-900/50 py-6 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-500">
+            &copy; 2026 Operación Defensa Web - Risaralda Challenge. <br class="sm:hidden">Desarrollado según especificaciones del PRD/SRS.
+        </div>
+    </footer>
+
+    <!-- Export modal placeholder -->
+    <div id="export-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div class="bg-surface-900 border border-gray-700 rounded-xl p-6 w-full max-w-sm shadow-2xl scale-95 opacity-0 transition-all duration-300" id="export-modal-content">
+            <h3 class="text-lg font-bold text-white mb-4">Exportar Informe</h3>
+            <p class="text-sm text-gray-400 mb-6">Seleccione el formato de descarga para el reporte ejecutivo de hallazgos TLS.</p>
+            
+            <div class="space-y-3">
+                <button onclick="app.simulateExport('PDF')" class="w-full flex items-center justify-between p-3 rounded-lg border border-gray-700 hover:border-brand-500 hover:bg-brand-500/10 transition-colors group">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="file-text" class="w-5 h-5 text-red-400"></i>
+                        <span class="text-gray-200 font-medium group-hover:text-brand-400">Documento PDF</span>
+                    </div>
+                    <i data-lucide="download" class="w-4 h-4 text-gray-500 group-hover:text-brand-500"></i>
+                </button>
+                <button onclick="app.simulateExport('HTML')" class="w-full flex items-center justify-between p-3 rounded-lg border border-gray-700 hover:border-brand-500 hover:bg-brand-500/10 transition-colors group">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="file-code" class="w-5 h-5 text-blue-400"></i>
+                        <span class="text-gray-200 font-medium group-hover:text-brand-400">Documento HTML</span>
+                    </div>
+                    <i data-lucide="download" class="w-4 h-4 text-gray-500 group-hover:text-brand-500"></i>
+                </button>
+            </div>
+            
+            <div class="mt-6 flex justify-end">
+                <button id="btn-close-modal" class="text-sm px-4 py-2 text-gray-400 hover:text-white transition-colors">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script src="js/app.js"></script>
+</body>
+</html>
