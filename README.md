@@ -176,5 +176,4 @@ Una vez desplegado en el VPS (`EJ: 146.190.142.141`), cualquier equipo desde cua
 curl -s http://146.190.142.141:8081/scan/ejemplo.com?deep=true
 ```
 
----
-*Desarrollado para la excelencia cibernética de Risaralda Challenge.*
+
