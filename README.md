@@ -40,25 +40,25 @@ graph TD
     classDef engine fill:#FFF3E0,stroke:#FF9800,stroke-width:2px;
     classDef external fill:#FCE4EC,stroke:#E91E63,stroke-width:2px;
 
-    UserBrowser([🌐 Navegador Web]):::client
-    CLIUser([💻 Operador CLI]):::client
+    UserBrowser(["🌐 Navegador Web"]):::client
+    CLIUser(["💻 Operador CLI"]):::client
 
     subgraph Node_Local ["Entorno Frontend"]
-        GUI_Server[🖥️ server.py (Puerto 8000)]:::backend
+        GUI_Server["🖥️ server.py (Puerto 8000)"]:::backend
     end
 
     subgraph Node_VPS ["Backend & API"]
-        FastAPI_Server[⚡ server_api.py (Puerto 8081)]:::backend
-        ShieldCLI[🚀 cli/shield.py]:::client
+        FastAPI_Server["⚡ server_api.py (Puerto 8081)"]:::backend
+        ShieldCLI["🚀 cli/shield.py"]:::client
     end
 
     subgraph Core_Engine ["Motor de Auditoría"]
-        Engine[⚙️ problema1.py]:::engine
-        PySSL[🐍 Python Native SSL]:::engine
-        TestSSL[🧰 testssl.sh Wrapper]:::engine
+        Engine["⚙️ problema1.py"]:::engine
+        PySSL["🐍 Python Native SSL"]:::engine
+        TestSSL["🧰 testssl.sh Wrapper"]:::engine
     end
 
-    Target((🎯 Servidor Objetivo)):::external
+    Target(("🎯 Servidor Objetivo")):::external
 
     UserBrowser -->|POST /api/scan| GUI_Server
     CLIUser --> ShieldCLI
@@ -95,10 +95,10 @@ El Front-end renderiza esta clasificación de forma interactiva (Glassmorphism),
 
 ```mermaid
 sequenceDiagram
-    participant UI as Front-End (Dashboard)
-    participant API as Python API
-    participant Core as problema1.py
-    participant TSSL as testssl.sh
+    participant UI as "Front-End (Dashboard)"
+    participant API as "Python API"
+    participant Core as "problema1.py"
+    participant TSSL as "testssl.sh"
     
     UI->>API: POST /scan {targets: ["ejemplo.com"], deep: true}
     API->>Core: analizar_servicio()
@@ -177,4 +177,3 @@ curl -s http://146.190.142.141:8081/scan/ejemplo.com?deep=true
 ```
 
 ---
-*Desarrollado para la excelencia cibernética de Risaralda Challenge.*
