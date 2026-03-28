@@ -1,113 +1,180 @@
-# 🛡️ Operación Defensa Web: Análisis de Configuración TLS
+# 🛡️ Shield TLS: Plataforma Avanzada de Análisis de Configuración TLS
 
-**Análisis de Seguridad de Transporte (TLS) en tiempo real **
+**Plataforma Integral de Ciberseguridad para Análisis de Transporte Criptográfico y Detección Temprana de Vulnerabilidades (Deep Scan).**
 
-Esta herramienta ha sido desarrollada como parte del reto "Operación Defensa Web: Análisis de Configuración TLS" de Risaralda. Proporciona una plataforma robusta para que analistas de seguridad y administradores de sistemas auditen de forma rápida y visual la configuración criptográfica de servidores públicos o privados.
+Shield TLS es una suite de auditoría desarrollada para el reto "Operación Defensa Web: Análisis de Configuración TLS" de Risaralda. Permite a analistas y DevSecOps evaluar la configuración criptográfica de servidores mediante una **Interfaz Gráfica Premium**, una **API REST veloz** y una **CLI poderosa**.
 
 ---
 
-## 🗺️ Visualización de Procesos y Flujos 
+## 🏗️ Arquitectura de Micro-Servicios en Python
 
-El siguiente diagrama representa el ciclo de vida completo de un análisis, diseñado para ser intuitivo desde el primer vistazo.
+El proyecto ha sido modularizado para separar las responsabilidades, asegurar la escalabilidad y permitir su despliegue tanto en terminales locales como en contenedores en la nube.
+
+### 1. El Motor Core (`problema1.py`)
+Es el corazón algorítmico del sistema. Implementa dos capas de auditoría:
+*   **Fast Handshake (Nativo)**: Usa la librería `ssl` nativa de Python para establecer un socket TCP en milisegundos y negociar la versión máxima de TLS soportada por el servidor remoto.
+*   **Deep Scan Engine (testssl.sh)**: Delega el escaneo profundo mediante `subprocess`, inyectando la carga de cientos de pruebas criptográficas contra el objetivo y *parseando* el JSON resultante de vulnerabilidades (CVEs, Heartbleed, Ticketbleed, etc.).
+
+### 2. La API REST (`server_api.py`)
+Expone la funcionalidad del motor a través de una API moderna construida con **FastAPI**.
+*   **Puerto**: 8081
+*   **Propósito**: Permite integraciones programáticas (Webhook/CI-CD) y sirve como el backend principal cuando la herramienta se despliega en arquitecturas distribuidas. Documentación autogenerada (Swagger/OpenAPI).
+
+### 3. El Servidor Visual (`server.py`)
+Un servidor ligero construido con la librería estándar `http.server`.
+*   **Puerto**: 8000
+*   **Propósito**: Entrega la capa de Front-End *(HTML, CSS con Tailwind, y JS)* directamente al navegador del analista. Actúa como proxy que enlaza la UI con la lógica de análisis a través del endpoint `/api/scan`.
+
+### 4. La Consola Interactiva (`algo/cli/shield.py`)
+Una herramienta de terminal basada en **Typer** y **Rich**.
+*   **Propósito**: Permite a los SysAdmins realizar auditorías masivas leyendo archivos CSV o pasando argumentos bash directamente en la terminal, dibujando tablas dinámicas espectaculares en tiempo real, sin usar el ratón.
+
+---
+
+## 🗺️ Mapa de Arquitectura Visual
 
 ```mermaid
 graph TD
-    %% Estilos de Nodos
-    classDef frontend fill:#E3F2FD,stroke:#2196F3,stroke-width:2px,color:#0D47A1;
-    classDef backend fill:#E8F5E9,stroke:#4CAF50,stroke-width:2px,color:#1B5E20;
-    classDef logic fill:#FFF3E0,stroke:#FF9800,stroke-width:2px,color:#E65100;
-    classDef storage fill:#FAFAFA,stroke:#9E9E9E,stroke-width:2px,color:#212121;
+    classDef client fill:#E1F5FE,stroke:#03A9F4,stroke-width:2px;
+    classDef backend fill:#E8F5E9,stroke:#4CAF50,stroke-width:2px;
+    classDef engine fill:#FFF3E0,stroke:#FF9800,stroke-width:2px;
+    classDef external fill:#FCE4EC,stroke:#E91E63,stroke-width:2px;
 
-    %% Flujo Principal
-    User([👤 Analista de Seguridad]) --> Input[1. Ingresa Dominios/IPs]
-    Input --> Action[2. Click en 'Iniciar Análisis']
+    UserBrowser([🌐 Navegador Web]):::client
+    CLIUser([💻 Operador CLI]):::client
+
+    subgraph Node_Local ["Entorno Frontend"]
+        GUI_Server[🖥️ server.py (Puerto 8000)]:::backend
+    end
+
+    subgraph Node_VPS ["Backend & API"]
+        FastAPI_Server[⚡ server_api.py (Puerto 8081)]:::backend
+        ShieldCLI[🚀 cli/shield.py]:::client
+    end
+
+    subgraph Core_Engine ["Motor de Auditoría"]
+        Engine[⚙️ problema1.py]:::engine
+        PySSL[🐍 Python Native SSL]:::engine
+        TestSSL[🧰 testssl.sh Wrapper]:::engine
+    end
+
+    Target((🎯 Servidor Objetivo)):::external
+
+    UserBrowser -->|POST /api/scan| GUI_Server
+    CLIUser --> ShieldCLI
     
-    subgraph Frontend_App ["🎨 Capa de Interfaz (Glassmorphism)"]
-        Action --> Validate[3. Validación Local]
-        Validate --> API_Call{4. Petición POST /api/scan}
-    end
+    GUI_Server --> Engine
+    FastAPI_Server --> Engine
+    ShieldCLI --> Engine
 
-    subgraph Backend_Server ["🐍 Motor de Backend (Python 3.13)"]
-        API_Call --> Parser[5. Procesador de Objetivos]
-        Parser --> Tasker[6. Ejecutor de Tareas]
-    end
+    Engine -->|Auditoría Básica| PySSL
+    Engine -->|Deep Scan (Opcional)| TestSSL
 
-    subgraph Security_Logic ["🛡️ Motor de Análisis"]
-        Tasker --> TCP_Socket[7. Handshake TCP/443]
-        TCP_Socket --> TLS_Neg[8. Negociación TLS Real]
-        TLS_Neg --> Rule_Engine[9. Evaluación de Reglas]
-        Rule_Engine --> Score[10. Calificación de Riesgo]
-    end
-
-    Score --> Response[11. JSON con Resultados]
-    Response --> UI_Render[12. Renderizado de Tarjetas]
-    UI_Render --> User_Insight[🌟 Insights & Recomendaciones]
-
-    %% Aplicación de Estilos
-    class Input,Action,Validate,API_Call,UI_Render frontend;
-    class Parser,Tasker backend;
-    class TCP_Socket,TLS_Neg,Rule_Engine,Score logic;
+    PySSL -->|TCP 443| Target
+    TestSSL -->|Probes TCP| Target
 ```
 
 ---
 
-## 🚀 ¿Qué hace esta herramienta?
+## 🧠 Lógica de Clasificación y Reportes
 
-La herramienta permite a un usuario ingresar uno o múltiples dominios o direcciones IP y ejecutar un **escaneo técnico profundo** de sus configuraciones de Seguridad de la Capa de Transporte (TLS). 
+La herramienta no muestra datos crudos, **evalúa y clasifica** para generar reportes ejecutivos listos para la toma de decisiones.
 
-A diferencia de herramientas estáticas, este sistema realiza un **handshake real** contra el servidor remoto para detectar qué protocolos están habilitados, evaluando instantáneamente su postura de seguridad frente a los estándares modernos (NIST, OWASP).
+### Motor de Reglas (Severidad)
+El algoritmo procesa la compatibilidad detectada y le asigna criticidad basándose en el estándar *NIST SP 800-52 Rev. 2* y *OWASP*:
 
----
+| Protocolo Detectado | Riesgo / Criticidad | Explicación del Motor | Recomendación Automatizada |
+| :--- | :---: | :--- | :--- |
+| **TLS 1.0 / 1.1** | 🔴 **ALTA** | Obsoleto, propenso a downgrade, POODLE, BEAST. | Deshabilitar explícitamente en el proxy/servidor. |
+| **TLS 1.2** | 🟡 **MEDIA** | Protocolo de transición. Seguro si el cifrado es fuerte. | Monitorizar ciphers y preparar salto a 1.3. |
+| **TLS 1.3** | 🟢 **BAJA** | Protocolo ideal (Perfect Forward Secrecy). | Mantener postura óptima de configuración. |
+| **ERROR / NULO** | 🔴 **CRÍTICA** | No se logró handshake TLS o el puerto está cerrado. | Revisar firewall o certificado SSL ausente. |
 
-## 🔍 Tipo de Análisis que realiza
+### Generación de Reportes
+El Front-end renderiza esta clasificación de forma interactiva (Glassmorphism), agrupando los hallazgos en una tabla con **badges de color**. Al activar el _Deep Scan_, `app.js` inyecta dinámicamente el arreglo de vulnerabilidades dentro de la fila expansible del dominio analizado.
 
-El motor de análisis se basa en una arquitectura de micro-fases integrada:
-
-1.  **Ingesta y Validación**: Procesa y valida sintácticamente los dominios o IPs suministradas.
-2.  **Motor TLS (Scan Real)**: 
-    *   Efectúa una conexión de socket TCP al puerto 443 del objetivo.
-    *   Intenta realizar una negociación TLS utilizando contextos seguros de Python.
-    *   Extrae la versión exacta del protocolo (TLS 1.0, 1.1, 1.2 o 1.3).
-3.  **Motor de Reglas**: 
-    *   Compara la versión detectada contra una base de conocimientos de vulnerabilidades conocidas.
-    *   Identifica protocolos obsoletos (vulnerables a ataques) y configuraciones subóptimas.
-4.  **Generación de Reporte Detallado**: 
-    *   Categoriza el riesgo (Baja, Media, Alta).
-    *   Provee una **explicación técnica** del hallazgo.
-    *   Ofrece **recomendaciones de endurecimiento (hardening)** accionables.
-
----
-
-## 🛡️ Identificación de Riesgos de Seguridad
-
-La herramienta es vital para identificar los siguientes riesgos en una infraestructura web:
-
-*   **Protocolos Obsoletos (TLS 1.0/1.1)**: Identifica si el servidor aún soporta estos protocolos, los cuales son vulnerables a ataques de interceptación como **POODLE** y **BEAST**. Marcados como **RIESGO ALTO**.
-*   **Configuraciones Subóptimas (TLS 1.2)**: Aunque TLS 1.2 sigue siendo seguro si se configura correctamente, la herramienta lo identifica como **RIESGO MEDIO** para incentivar la migración a TLS 1.3.
-*   **Errores de Configuración**: Detecta servidores que no responden adecuadamente en el puerto 443 o que tienen configuraciones TLS rotas, lo que puede causar denegación de servicio o fallos de conexión para clientes legítimos.
-*   **Falta de Modernización**: Ayuda a validar el cumplimiento de políticas de seguridad que exigen el uso exclusivo de **TLS 1.3**, el protocolo más seguro y rápido disponible hoy en día.
-
----
-
-## 🛠️ Tecnologías Utilizadas
-
-*   **Backend**: Python 3.13 (Sockets, SSL, `http.server`).
-*   **Frontend**: HTML5, Vanilla JavaScript, Tailwind CSS (Diseño Premium con Glassmorphism).
-*   **Iconografía**: Lucide Icons.
-*   **Diseño**: Enfoque "Cybersecurity Dark Theme" responsivo y moderno.
+```mermaid
+sequenceDiagram
+    participant UI as Front-End (Dashboard)
+    participant API as Python API
+    participant Core as problema1.py
+    participant TSSL as testssl.sh
+    
+    UI->>API: POST /scan {targets: ["ejemplo.com"], deep: true}
+    API->>Core: analizar_servicio()
+    Core-->>API: {version: TLS1.2, status: Habilitado}
+    
+    Note over API,TSSL: Inicia el Escaneo Profundo
+    API->>Core: deep_scan_with_testssl()
+    Core->>TSSL: Ejecución Subprocess
+    TSSL-->>Core: Reporte JSON crudo
+    Core->>Core: Algoritmo de extracción (Solo CVEs críticos/altos)
+    Core-->>API: [{id: CVE-2014-0160, severity: HIGH}]
+    
+    API-->>UI: Response HTTP 200 (JSON Estructurado)
+    UI->>UI: Renderizado iterativo de DOM y Badges
+```
 
 ---
 
-## 📦 Instalación y Uso Rápido
+## 🚀 Guía Paso a Paso: Instalación y Funcionamiento
 
-1.  Asegúrate de estar en el directorio raíz del proyecto.
-2.  Ejecuta el servidor maestro:
-    ```bash
-    python server.py
-    ```
-3.  Abre tu navegador en: `http://localhost:8000`
-4.  Ingresa los dominios (uno por línea) y haz clic en **"Iniciar Análisis"**.
+### 1. Entorno Local (Windows / MacOS / Linux)
+Esta configuración levantará el servidor gráfico y la API. Requiere **Python 3.10+**.
+
+```bash
+# 1. Clona el repositorio
+git clone <tu-repo-url>
+cd operacion-defensa-web
+
+# 2. Instala las dependencias del ecosistema Python
+pip install -r requirements.txt
+
+# 3. (Opcional para Deep Scan) Descarga el script de testssl
+git clone --depth=1 https://github.com/drwetter/testssl.sh.git
+# En Linux/WSL/MacOS haz un enlace simbólico: sudo ln -sf $(pwd)/testssl.sh/testssl.sh /usr/local/bin/testssl
+
+# 4. Enciende el Backend y el Frontend (Corre este comando o despáchalos en terminales separadas)
+python algo/server.py &
+python server_api.py
+```
+👉 Abre tu navegador en [http://localhost:8000](http://localhost:8000).
 
 ---
 
-*Desarrollado para el reto Risaralda: Análisis de Configuración TLS.*
+### 2. Auditando desde la Terminal (Shield CLI)
+Si administras servidores, no necesitas abrir el navegador. Shield CLI es tu arma nativa.
+
+```bash
+# Ejecutar un escaneo directo de un dominio por terminal
+python algo/cli/shield.py scan google.com
+
+# Escanear dominios listados dentro de un archivo CSV usando 5 hilos de concurrencia
+python algo/cli/shield.py bulk lista-dominios.csv --workers 5
+```
+El CLI imprimirá una tabla `Rich` coloreada indicando de manera veloz todas las debilidades del lote de dominios.
+
+---
+
+## 🐳 Despliegue en VPS (DigitalOcean Droplet + Docker)
+
+Shield TLS ha sido diseñado para correr ininterrumpidamente en la nube como una API remota mediante Dockerizados robustos.
+
+### Pasos en tu Servidor (Ubuntu/Debian):
+1. Transfiere tu repositorio al VPS.
+2. Ingresa a la carpeta del proyecto y construye el contenedor que instalará los binarios subyacentes (`git`, `dnsutils`, `testssl.sh`) junto con el código Python:
+   ```bash
+   docker build -t shield-server-v2 -f Dockerfile.api .
+   ```
+3. Ejecuta el contenedor en modo _daemon_ (persistente) publicando el puerto 8081:
+   ```bash
+   docker run -d --name my-shield-api --restart always -p 8081:8081 shield-server-v2
+   ```
+
+Una vez desplegado en el VPS (`EJ: 146.190.142.141`), cualquier equipo desde cualquier parte del mundo podría auditar una web utilizando curl:
+```bash
+curl -s http://146.190.142.141:8081/scan/ejemplo.com?deep=true
+```
+
+---
+*Desarrollado para la excelencia cibernética de Risaralda Challenge.*
